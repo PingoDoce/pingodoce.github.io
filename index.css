@@ -24,7 +24,7 @@ nav ul li {
     display: inline;
 }
 
-nav ul li a {
+a {
     color: #fff;
     text-decoration: none;
 }
@@ -55,4 +55,15 @@ p {
 footer {
     text-align: center;
     margin-top: auto;
+}
+
+footer ul li{
+    display: block;
+    float: left;
+    padding: 5px;
+    color: #fff;
+    text-decoration: none;
+}
+img {
+    width: 100%;
 }
