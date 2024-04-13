@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kółko i krzyżyk</title>
+    <link rel="stylesheet" type="text/css" href="index.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 2px;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: #eee;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            cursor: pointer;
+        }
+        .cell:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Tytuł Strony</h1>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="#">Opcja 2</a></li>
+            <li><a href="#">Opcja 3</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="board"></div>
+<div id="status"></div>
+<div>
+    <label for="players">Number of Players:</label>
+    <select id="players">
+        <option value="1">1 Player</option>
+        <option value="2">2 Players</option>
+    </select>
+    <button onclick="startGame()">Start Game</button>
+    <label for="difficulty">Difficulty:</label>
+    <select id="difficulty" onchange="changeDifficulty()">
+        <option value="easy">Easy</option>
+        <option value="hard">Hard</option>
+    </select>
+    <button onclick="resetGame()">Reset Game</button>
+</div>
+
+<script>
+    const board = document.querySelector('.board');
+    const statusDisplay = document.getElementById('status');
+    let currentPlayer = 'X';
+    let gameActive = false; // Game is not active initially
+    let gameMode = 'single'; // 'single' or 'multi'
+    let difficulty = 'easy'; // 'easy' or 'hard'
+
+    const winningCombinations = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],
+        [0, 4, 8], [2, 4, 6]
+    ];
+
+    const cells = Array.from({ length: 9 });
+
+    function initializeBoard() {
+        cells.fill(null);
+        board.innerHTML = '';
+        cells.forEach((_, index) => {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            cell.setAttribute('data-index', index);
+            cell.addEventListener('click', handleCellClick);
+            board.appendChild(cell);
+        });
+        statusDisplay.textContent = '';
+        gameActive = true;
+        currentPlayer = 'X';
+    }
+
+    function startGame() {
+        const playersSelect = document.getElementById('players');
+        const selectedPlayers = playersSelect.value;
+        gameMode = selectedPlayers === '1' ? 'single' : 'multi';
+        initializeBoard();
+    }
+
+    function handleCellClick(event) {
+        const clickedCell = event.target;
+        const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
+
+        if (cells[clickedCellIndex] || !gameActive) return;
+
+        cells[clickedCellIndex] = currentPlayer;
+        clickedCell.textContent = currentPlayer;
+
+        if (checkWin(currentPlayer)) {
+            statusDisplay.textContent = `Player ${currentPlayer} wins!`;
+            gameActive = false;
+        } else if (checkDraw()) {
+            statusDisplay.textContent = "It's a draw!";
+            gameActive = false;
+        }
+
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X'; // Change player after each move
+
+        if (gameMode === 'single' && currentPlayer === 'O' && gameActive) {
+            makeComputerMove(); // If human player's turn, make computer move
+        }
+    }
+
+    function checkWin(player) {
+        return winningCombinations.some(combination => {
+            return combination.every(index => {
+                return cells[index] === player;
+            });
+        });
+    }
+
+    function checkDraw() {
+        return cells.every(cell => cell);
+    }
+
+    function makeComputerMove() {
+        if (!gameActive) return;
+        const availableCells = cells.reduce((acc, cell, index) => {
+            if (!cell) acc.push(index);
+            return acc;
+        }, []);
+        const randomIndex = Math.floor(Math.random() * availableCells.length);
+        const randomCellIndex = availableCells[randomIndex];
+        cells[randomCellIndex] = 'O';
+        document.querySelector(`[data-index="${randomCellIndex}"]`).textContent = 'O';
+
+        if (checkWin('O')) {
+            statusDisplay.textContent = 'Computer wins!';
+            gameActive = false;
+        } else if (checkDraw()) {
+            statusDisplay.textContent = "It's a draw!";
+            gameActive = false;
+        }
+
+        currentPlayer = 'X'; // Change player after computer move
+    }
+
+    function changeDifficulty() {
+        difficulty = document.getElementById('difficulty').value;
+    }
+
+    function resetGame() {
+        initializeBoard();
+    }
+
+</script>
+
+<footer>
+    <p>Stopka strony</p>
+    <ul>
+        <li><a href="#">Opcja 1</a></li>
+        <li><a href="#">Opcja 2</a></li>
+        <li><a href="#">Opcja 3</a></li>
+    </ul>
+</footer>
+</body>
+</html>
